@@ -1,6 +1,9 @@
+const { Op } = require('sequelize');
+const checkRole = require('../middleware/role');  
+const { Category } = require('../models/association');
+
 const express = require('express');
 const { body, validationResult } = require('express-validator');
-const  Category  = require('../models/category');
 
 const router = express.Router();
 
@@ -32,12 +35,18 @@ const router = express.Router();
  *       200:
  *         description: List of categories
  */
+
+
 router.get('/', async (req, res) => {
     try {
         let { page = 1, limit = 10, sort = 'asc', search = '' } = req.query;
         page = parseInt(page);
         limit = parseInt(limit);
         const offset = (page - 1) * limit;
+
+        if (!['asc', 'desc'].includes(sort.toLowerCase())) {
+            return res.status(400).json({ error: 'Sort must be "asc" or "desc"' });
+        }
 
         const whereCondition = search
             ? { name: { [Op.like]: `%${search}%` } }
@@ -52,6 +61,7 @@ router.get('/', async (req, res) => {
 
         res.status(200).json({ total: categories.count, data: categories.rows });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -117,8 +127,13 @@ router.post('/', [
 
     try {
         const { name } = req.body;
-        const category = await Category.create({ name });
+        const existingCategory = await Category.findOne({ where: { name } });
 
+        if (existingCategory) {
+            return res.status(400).json({ error: 'Category already exists' });
+        }
+
+        const category = await Category.create({ name });
         res.status(201).json(category);
     } catch (error) {
         console.error(error);
@@ -162,6 +177,7 @@ router.put('/:id', async (req, res) => {
         await category.update(req.body);
         res.status(200).json(category);
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -192,6 +208,7 @@ router.delete('/:id', async (req, res) => {
         await category.destroy();
         res.status(200).json({ message: 'Category deleted' });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

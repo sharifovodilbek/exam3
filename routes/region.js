@@ -7,7 +7,7 @@
 
 const express = require("express");
 const Region = require("../models/region");
-const User = require("../models/user");
+const {User} = require("../models/association");
 const authenticate = require("../middleware/auth");
 const authorize = require("../middleware/role");
 const { Op } = require("sequelize");

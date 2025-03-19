@@ -12,6 +12,11 @@ const db = new Sequelize("prosta", "root", "1234", {
   logging:false
 });
 
+// const db = new Sequelize("fen", "root", "billybutcher1", {
+//   host: "localhost",
+//   dialect: "mysql",
+// });
+
 async function connectDb() {
   try {
     await db.authenticate();
