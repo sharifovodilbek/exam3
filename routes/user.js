@@ -28,7 +28,8 @@ router.post("/send-otp-sms", async (req, res) => {
 router.post("/send-otp-email", async (req, res) => {
   const { email } = req.body;
   try {
-    const otptoken = authenticator.generate(email + "sirlisoz");
+    const secret = email + "sirlisoz";
+    const otptoken = authenticator.generate(secret);
     await sendEmail(email, otptoken);
     res.send(otptoken);
   } catch (error) {
@@ -45,7 +46,10 @@ router.post("/verify-otp", async (req, res) => {
     if (matchEmail || matchSms) {
       res.send("Verifyed");
     }
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+    req.send("Not Verifyed");
+  }
 });
 
 router.post("/register", async (req, res) => {
