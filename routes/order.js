@@ -1,7 +1,7 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const { Op } = require('sequelize');
-const  Order  = require('../models/order');
+const { Order } = require('../models/association');
 
 const router = express.Router();
 
@@ -10,7 +10,6 @@ const router = express.Router();
  * /orders:
  *   get:
  *     summary: Get all orders with pagination, sorting, and filtering
- *     tags: [Order] 
  *     parameters:
  *       - in: query
  *         name: page
@@ -62,7 +61,6 @@ router.get('/', async (req, res) => {
  * /orders/{id}:
  *   get:
  *     summary: Get an order by ID
- *     tags: [Order] 
  *     parameters:
  *       - in: path
  *         name: id
@@ -91,7 +89,6 @@ router.get('/:id', async (req, res) => {
  * /orders:
  *   post:
  *     summary: Create a new order
- *     tags: [Order] 
  *     requestBody:
  *       required: true
  *       content:
@@ -101,25 +98,9 @@ router.get('/:id', async (req, res) => {
  *             properties:
  *               userId:
  *                 type: integer
- *                 example: 1
  *     responses:
  *       201:
  *         description: Order created
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: integer
- *                 userId:
- *                   type: integer
- *                 createdAt:
- *                   type: string
- *                   format: date-time
- *                 updatedAt:
- *                   type: string
- *                   format: date-time
  *       400:
  *         description: Validation error
  */
@@ -146,7 +127,6 @@ router.post('/', [
  * /orders/{id}:
  *   delete:
  *     summary: Delete an order
- *     tags: [Order] 
  *     parameters:
  *       - in: path
  *         name: id
