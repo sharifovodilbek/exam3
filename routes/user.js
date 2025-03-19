@@ -16,6 +16,7 @@ authenticator.options = { step: 120 };
  * /auth/send-otp-sms:
  *   post:
  *     summary: Telefon raqamga OTP jo‘natish
+ *     tags: [Users]
  *     requestBody:
  *       required: true
  *       content:
@@ -47,6 +48,7 @@ router.post("/send-otp-sms", async (req, res) => {
  * /auth/send-otp-email:
  *   post:
  *     summary: Emailga OTP jo‘natish
+ *     tags: [Users]
  *     requestBody:
  *       required: true
  *       content:
@@ -80,6 +82,7 @@ router.post("/send-otp-email", async (req, res) => {
  * /auth/register:
  *   post:
  *     summary: Yangi foydalanuvchi ro‘yxatdan o‘tkazish
+ *     tags: [Users]
  *     requestBody:
  *       required: true
  *       content:
@@ -135,6 +138,7 @@ router.post("/register", async (req, res) => {
  * /auth/login:
  *   post:
  *     summary: Foydalanuvchi tizimga kirishi
+ *     tags: [Users]
  *     requestBody:
  *       required: true
  *       content:
@@ -177,6 +181,7 @@ module.exports = router;
  * /users:
  *   get:
  *     summary: Foydalanuvchilarni olish
+ *     tags: [Users]
  *     parameters:
  *       - in: query
  *         name: page
@@ -233,6 +238,7 @@ router.get("/", async (req, res) => {
  * /users/{id}:
  *   get:
  *     summary: Foydalanuvchini ID bo‘yicha olish
+ *     tags: [Users]
  *     parameters:
  *       - in: path
  *         name: id
@@ -260,6 +266,7 @@ router.get("/:id", async (req, res) => {
  * /users/{id}:
  *   put:
  *     summary: Foydalanuvchini yangilash
+ *     tags: [Users]
  *     parameters:
  *       - in: path
  *         name: id
@@ -297,6 +304,7 @@ router.put("/:id", async (req, res) => {
  * /users/{id}:
  *   delete:
  *     summary: Foydalanuvchini o‘chirish
+ *     tags: [Users]
  *     parameters:
  *       - in: path
  *         name: id
