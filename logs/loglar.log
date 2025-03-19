@@ -18,3 +18,7 @@
 {"level":"info","message":"POST /api/comments","timestamp":"2025-03-19T10:41:43.368Z"}
 {"level":"info","message":"POST /categories","timestamp":"2025-03-19T10:42:50.041Z"}
 {"level":"info","message":"POST /categories","timestamp":"2025-03-19T10:43:17.564Z"}
+{"level":"info","message":"POST /api/users/register","timestamp":"2025-03-19T11:06:37.047Z"}
+{"level":"info","message":"POST /api/users/register","timestamp":"2025-03-19T11:09:05.259Z"}
+{"level":"info","message":"POST /api/regions","timestamp":"2025-03-19T11:09:24.514Z"}
+{"level":"info","message":"POST /api/regions","timestamp":"2025-03-19T11:09:25.708Z"}

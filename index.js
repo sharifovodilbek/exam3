@@ -53,6 +53,8 @@ app.use("/api/products", Product);
 app.use("/api/categories", Category);
 app.use("/api/orders", Order);
 app.use("/api/orderItems", orderItem);
+app.use("/uploads", express.static("uploads"));
+
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
