@@ -5,7 +5,11 @@ const { Sequelize } = require("sequelize");
 //   dialect: "mysql",
 // });
 
+<<<<<<< HEAD
 const db = new Sequelize("fen", "root", "billybutcher1", {
+=======
+const db = new Sequelize("n17", "root", "1234", {
+>>>>>>> 3385de3f4ffd9fe2ae8ed23ee3cf06a77da536ea
   host: "localhost",
   dialect: "mysql",
 });
