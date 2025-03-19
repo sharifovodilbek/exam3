@@ -263,3 +263,9 @@
 {"level":"info","message":"GET /api-docs/swagger-ui-standalone-preset.js","timestamp":"2025-03-19T12:42:00.826Z"}
 {"level":"info","message":"GET /api-docs/swagger-ui-init.js","timestamp":"2025-03-19T12:42:00.828Z"}
 {"level":"info","message":"GET /api-docs/favicon-32x32.png","timestamp":"2025-03-19T12:42:01.149Z"}
+{"level":"info","message":"GET /api-docs/","timestamp":"2025-03-19T12:50:47.913Z"}
+{"level":"info","message":"GET /api-docs/swagger-ui.css","timestamp":"2025-03-19T12:50:47.973Z"}
+{"level":"info","message":"GET /api-docs/swagger-ui-bundle.js","timestamp":"2025-03-19T12:50:47.981Z"}
+{"level":"info","message":"GET /api-docs/swagger-ui-standalone-preset.js","timestamp":"2025-03-19T12:50:47.983Z"}
+{"level":"info","message":"GET /api-docs/swagger-ui-init.js","timestamp":"2025-03-19T12:50:47.985Z"}
+{"level":"info","message":"GET /api-docs/favicon-32x32.png","timestamp":"2025-03-19T12:50:48.238Z"}

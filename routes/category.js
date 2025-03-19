@@ -100,7 +100,7 @@ router.get('/:id', async (req, res) => {
  * /categories:
  *   post:
  *     summary: Create a new category
- *     tags: [Category]
+ *     tags: [Categories]
  *     requestBody:
  *       required: true
  *       content:
