@@ -9,9 +9,11 @@ const Product = db.define('Product', {
   categoryId: { type: DataTypes.BIGINT },
   userId: { type: DataTypes.INTEGER }
 }, {
-  timestamps: true
+  timestamps: true,
+  tableName:"products"
 });
 
+module.exports=Product
 
 
 
@@ -44,5 +46,3 @@ const Product = db.define('Product', {
 
 
 
-
-module.exports = Product;

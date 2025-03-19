@@ -1,7 +1,7 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const { Op } = require('sequelize');
-const { OrderItem } = require('../models/orderItem');
+const OrderItem = require('../models/orderItem');
 
 const router = express.Router();
 
@@ -10,6 +10,7 @@ const router = express.Router();
  * /order-items:
  *   get:
  *     summary: Get all order items with pagination, sorting, and filtering
+ *     tags: [Order-Item] 
  *     parameters:
  *       - in: query
  *         name: page
@@ -66,6 +67,7 @@ router.get('/', async (req, res) => {
  * /order-items/{id}:
  *   get:
  *     summary: Get an order item by ID
+ *     tags: [Order-Item] 
  *     parameters:
  *       - in: path
  *         name: id
@@ -94,6 +96,7 @@ router.get('/:id', async (req, res) => {
  * /order-items:
  *   post:
  *     summary: Create a new order item
+ *     tags: [Order-Item] 
  *     requestBody:
  *       required: true
  *       content:
@@ -137,6 +140,7 @@ router.post('/', [
  * /order-items/{id}:
  *   delete:
  *     summary: Delete an order item
+ *     tags: [Order-Item] 
  *     parameters:
  *       - in: path
  *         name: id

@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
-const { Category } = require('../models/category');
+const  Category  = require('../models/category');
 
 const router = express.Router();
 
@@ -9,6 +9,7 @@ const router = express.Router();
  * /categories:
  *   get:
  *     summary: Get all categories with pagination, sorting, and filtering
+ *     tags: [Categories] 
  *     parameters:
  *       - in: query
  *         name: page
@@ -60,6 +61,7 @@ router.get('/', async (req, res) => {
  * /categories/{id}:
  *   get:
  *     summary: Get a category by ID
+ *     tags: [Categories] 
  *     parameters:
  *       - in: path
  *         name: id
@@ -88,6 +90,7 @@ router.get('/:id', async (req, res) => {
  * /categories:
  *   post:
  *     summary: Create a new category
+ *     tags: [Category]
  *     requestBody:
  *       required: true
  *       content:
@@ -97,9 +100,10 @@ router.get('/:id', async (req, res) => {
  *             properties:
  *               name:
  *                 type: string
+ *                 example: "Electronics"
  *     responses:
  *       201:
- *         description: Category created
+ *         description: Category created successfully
  *       400:
  *         description: Validation error
  */
@@ -117,15 +121,18 @@ router.post('/', [
 
         res.status(201).json(category);
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
 
 /**
  * @swagger
  * /categories/{id}:
  *   put:
  *     summary: Update a category
+ *     tags: [Categories] 
  *     parameters:
  *       - in: path
  *         name: id
@@ -164,6 +171,7 @@ router.put('/:id', async (req, res) => {
  * /categories/{id}:
  *   delete:
  *     summary: Delete a category
+ *     tags: [Categories] 
  *     parameters:
  *       - in: path
  *         name: id
