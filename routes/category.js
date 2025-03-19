@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
-const { Category } = require('../models/category');
+const { Category } = require('../models/association');
 
 const router = express.Router();
 
