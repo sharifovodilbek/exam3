@@ -7,7 +7,7 @@ const Region = require("./region");
 const User = require("./user");
 
 // ? regionga user qo'shildi
-Region.hasMany(user, { foreignKey: "regionId" });
+Region.hasMany(User, { foreignKey: "regionId" });
 User.belongsTo(Region, { foreignKey: "regionId" });
 
 // ? userga order qo'shildi
@@ -23,7 +23,7 @@ Comment.hasMany(User, { foreignKey: "userId" });
 User.belongsTo(Comment, { foreignKey: "userId" });
 
 // ? user va product ulandi
-User.hasMany(product, { foreignKey: "userId" });
+User.hasMany(Product, { foreignKey: "userId" });
 Product.belongsTo(User, { foreignKey: "userId" });
 
 // ? comment va product ulandi

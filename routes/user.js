@@ -3,7 +3,6 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
 const { User } = require("../models/association");
-const User = require("../models/user");
 const sendSMS = require("../config/sendSMS");
 const { sendEmail } = require("../config/sendEMAIL");
 const router = express.Router();
