@@ -16,7 +16,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/regions:
+ * /regions:
  *   post:
  *     summary: Create a new region
  *     tags: [Regions]
@@ -33,7 +33,7 @@ const router = express.Router();
  *       201:
  *         description: Region created successfully
  */
-router.post("/", authenticate, authorize("admin"), async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const region = await Region.create(req.body);
     res.status(201).json(region);

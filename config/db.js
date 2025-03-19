@@ -6,11 +6,11 @@ const { Sequelize } = require("sequelize");
 //   logging:false
 // });
 
-const db = new Sequelize("prosta", "root", "1234", {
-  host: "localhost",
-  dialect: "mysql",
-  logging:false
-});
+// const db = new Sequelize("prosta", "root", "1234", {
+//   host: "localhost",
+//   dialect: "mysql",
+//   logging:false
+// });
 
 // const db = new Sequelize("fen", "root", "billybutcher1", {
 //   host: "localhost",
