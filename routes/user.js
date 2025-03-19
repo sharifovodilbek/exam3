@@ -2,16 +2,20 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
-// const { User } = require("../models/association");
+const { User } = require("../models/association");
 const User = require("../models/user");
 const sendSMS = require("../config/sendSMS");
+const { sendEmail } = require("../config/sendEMAIL");
 const router = express.Router();
 
-const { totp } = require("otplib");
+const { totp, authenticator } = require("otplib");
 totp.options = {
   step: 120,
 };
-router.post("/send-otp", async (req, res) => {
+authenticator.options = {
+  step: 120,
+};
+router.post("/send-otp-sms", async (req, res) => {
   const { phone } = req.body;
   try {
     const otptoken = totp.generate(phone + "sirlisoz");
@@ -22,10 +26,35 @@ router.post("/send-otp", async (req, res) => {
   }
 });
 
-router.post("/register", async (req, res) => {
+router.post("/send-otp-email", async (req, res) => {
+  const { email } = req.body;
   try {
-    const { name, password, regionId, phone, image, email, year, role } =
-      req.body;
+    const otptoken = authenticator.generate(email + "sirlisoz");
+    await sendEmail(email, otptoken);
+    res.send(otptoken);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+router.post("/verify-otp", async (req, res) => {
+  const { otp, phone, email } = req.body;
+  try {
+    const matchEmail = authenticator.check(otp, email + "sirlisoz");
+    const matchSms = totp.check(otp, phone + "sirlisoz");
+
+    if (matchEmail || matchSms) {
+      res.send("Verifyed");
+    }
+  } catch (error) {}
+});
+
+router.post("/register", async (req, res) => {
+  const { name, password, regionId, phone, image, email, year, role } =
+    req.body;
+  try {
+    await User.findOne({ where: { email } });
+    if (User) return res.send("user already exist");
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
       name,
