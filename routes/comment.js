@@ -1,6 +1,6 @@
 const express = require("express");
 const Comment = require("../models/comment");
-const User = require("../models/user");
+const {User} = require("../models/association");
 const authenticate = require("../middleware/auth");
 const authorize = require("../middleware/role");
 

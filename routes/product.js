@@ -1,7 +1,7 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const { Op } = require('sequelize');
-const { Product } = require('../models/product');
+const { Product } = require('../models/association');
 const multer = require('multer');
 
 const upload = multer({ dest: 'uploads/' });

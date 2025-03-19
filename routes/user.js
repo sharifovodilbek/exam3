@@ -2,7 +2,7 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
-const  User  = require("../models/user");
+const { User } = require("../models/association");
 const sendSMS = require("../config/sendSMS");
 const { sendEmail } = require("../config/sendEMAIL");
 const router = express.Router();
@@ -65,13 +65,15 @@ router.post("/send-otp-sms", async (req, res) => {
 router.post("/send-otp-email", async (req, res) => {
   const { email } = req.body;
   try {
-    const otptoken = authenticator.generate(email + "sirlisoz");
+    const secret = email + "sirlisoz";
+    const otptoken = authenticator.generate(secret);
     await sendEmail(email, otptoken);
     res.send(otptoken);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
+
 
 /**
  * @swagger
@@ -97,6 +99,22 @@ router.post("/send-otp-email", async (req, res) => {
  *       400:
  *         description: Xato
  */
+
+router.post("/verify-otp", async (req, res) => {
+  const { otp, phone, email } = req.body;
+  try {
+    const matchEmail = authenticator.check(otp, email + "sirlisoz");
+    const matchSms = totp.check(otp, phone + "sirlisoz");
+
+    if (matchEmail || matchSms) {
+      res.send("Verifyed");
+    }
+  } catch (error) {
+    console.log(error);
+    req.send("Not Verifyed");
+  }
+});
+
 router.post("/register", async (req, res) => {
   const { name, password, email } = req.body;
   try {

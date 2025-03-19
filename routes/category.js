@@ -192,8 +192,8 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const { Op } = require('sequelize');
-const { Category } = require('../models/category');
 const checkRole = require('../middleware/role');  
+const { Category } = require('../models/association');
 
 const router = express.Router();
 

@@ -1,7 +1,7 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const { Op } = require('sequelize');
-const { OrderItem } = require('../models/orderItem');
+const { OrderItem } = require('../models/association');
 
 const router = express.Router();
 
