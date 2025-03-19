@@ -9,11 +9,10 @@ async function connectDb() {
   try {
     await db.authenticate();
     console.log("db connected");
-    // await db.sync({force:true});
+    // await db.sync({ force: true });
     // console.log("db synced");
-    
   } catch (error) {
     console.log(error);
   }
 }
-module.exports={connectDb, db}
+module.exports = { connectDb, db };

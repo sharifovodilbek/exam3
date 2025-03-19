@@ -1,3 +1,4 @@
+
 const { db } = require("../config/db");
 const { DataTypes } = require("sequelize");
 
@@ -34,5 +35,4 @@ const Product = db.define(
     timestamps: true,
   }
 );
-
-module.exports = Product;
+module.exports= Product;

@@ -2,15 +2,30 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
+// const { User } = require("../models/association");
 const User = require("../models/user");
-
+const sendSMS = require("../config/sendSMS");
 const router = express.Router();
+
+const { totp } = require("otplib");
+totp.options = {
+  step: 120,
+};
+router.post("/send-otp", async (req, res) => {
+  const { phone } = req.body;
+  try {
+    const otptoken = totp.generate(phone + "sirlisoz");
+    await sendSMS(phone, otptoken);
+    res.send(otptoken);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
 
 router.post("/register", async (req, res) => {
   try {
     const { name, password, regionId, phone, image, email, year, role } =
       req.body;
-
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
       name,
@@ -51,8 +66,13 @@ router.post("/login", async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
-    const { page = 1, limit = 10, sort = "createdAt", order = "DESC", role } =
-      req.query;
+    const {
+      page = 1,
+      limit = 10,
+      sort = "createdAt",
+      order = "DESC",
+      role,
+    } = req.query;
     const whereCondition = {};
 
     if (role) whereCondition.role = role;
