@@ -368,3 +368,9 @@
 =======
 >>>>>>> 3b166a44c40ab51ead306820ad46ce51f372a37f
 >>>>>>> c1d103b8d5f710a64109b5991101fc2c2b04c2b4
+{"level":"info","message":"GET /api-docs/","timestamp":"2025-03-20T08:51:45.376Z"}
+{"level":"info","message":"GET /api-docs/swagger-ui.css","timestamp":"2025-03-20T08:51:45.512Z"}
+{"level":"info","message":"GET /api-docs/swagger-ui-standalone-preset.js","timestamp":"2025-03-20T08:51:45.520Z"}
+{"level":"info","message":"GET /api-docs/swagger-ui-bundle.js","timestamp":"2025-03-20T08:51:45.522Z"}
+{"level":"info","message":"GET /api-docs/swagger-ui-init.js","timestamp":"2025-03-20T08:51:45.531Z"}
+{"level":"info","message":"GET /api-docs/favicon-32x32.png","timestamp":"2025-03-20T08:51:46.651Z"}
