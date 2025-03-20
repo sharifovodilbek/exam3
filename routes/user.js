@@ -248,7 +248,7 @@ router.post("/register", upload.single("image"), async (req, res) => {
  * /login:
  *   post:
  *     summary: Foydalanuvchini tizimga kirishi
- *     tags: [Auth]
+ *     tags: [Users]
  *     parameters:
  *       - in: query
  *         name: email
