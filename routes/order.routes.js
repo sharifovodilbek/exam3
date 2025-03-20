@@ -36,7 +36,8 @@ const router = express.Router();
  *       200:
  *         description: List of orders
  */
-router.get("/getOrders", async (req, res) => {
+router.get("/getOrders", authenticate,
+  authorize(["admin"]), async (req, res) => {
   try {
     let { page = 1, limit = 10, sort = "asc", search = "" } = req.query;
     page = parseInt(page);
