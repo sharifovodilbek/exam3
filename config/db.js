@@ -12,10 +12,10 @@ const { Sequelize } = require("sequelize");
 //   logging:false
 // });
 
-const db = new Sequelize("fen", "root", "billybutcher1", {
-  host: "localhost",
-  dialect: "mysql",
-});
+// const db = new Sequelize("fen", "root", "billybutcher1", {
+//   host: "localhost",
+//   dialect: "mysql",
+// });
 
 async function connectDb() {
   try {
