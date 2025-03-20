@@ -4,7 +4,7 @@ const { Op } = require('sequelize');
 const { Product } = require('../models/association');
 const multer = require('multer');
 
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ dest: "uploads/" });
 const router = express.Router();
 
 /**
@@ -34,30 +34,30 @@ const router = express.Router();
  *       200:
  *         description: List of products
  */
-router.get('/', async (req, res) => {
-    try {
-        let { page = 1, limit = 10, sort = 'asc', search = '' } = req.query;
-        page = parseInt(page);
-        limit = parseInt(limit);
-        const offset = (page - 1) * limit;
+router.get("/products", async (req, res) => {
+  try {
+    let { page = 1, limit = 10, sort = "asc", search = "" } = req.query;
+    page = parseInt(page);
+    limit = parseInt(limit);
+    const offset = (page - 1) * limit;
 
-        const whereCondition = search
-            ? {
-                name: { [Op.like]: `%${search}%` }
-            }
-            : {};
+    const whereCondition = search
+      ? {
+          name: { [Op.like]: `%${search}%` },
+        }
+      : {};
 
-        const products = await Product.findAndCountAll({
-            where: whereCondition,
-            limit,
-            offset,
-            order: [['price', sort]]
-        });
+    const products = await Product.findAndCountAll({
+      where: whereCondition,
+      limit,
+      offset,
+      order: [["price", sort]],
+    });
 
-        res.status(200).json({ total: products.count, data: products.rows });
-    } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
-    }
+    res.status(200).json({ total: products.count, data: products.rows });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 /**
@@ -77,15 +77,15 @@ router.get('/', async (req, res) => {
  *       404:
  *         description: Product not found
  */
-router.get('/:id', async (req, res) => {
-    try {
-        const product = await Product.findByPk(req.params.id);
-        if (!product) return res.status(404).json({ error: 'Product not found' });
+router.get("products/:id", async (req, res) => {
+  try {
+    const product = await Product.findByPk(req.params.id);
+    if (!product) return res.status(404).json({ error: "Product not found" });
 
-        res.status(200).json(product);
-    } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
-    }
+    res.status(200).json(product);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 /**
@@ -96,23 +96,61 @@ router.get('/:id', async (req, res) => {
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
  *               name:
  *                 type: string
+ *                 description: Name of the product
  *               price:
  *                 type: number
+ *                 format: float
+ *                 description: Price of the product (must be a positive number)
  *               categoryId:
  *                 type: integer
+ *                 description: Category ID associated with the product
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Optional product image file
  *     responses:
  *       201:
- *         description: Product created
+ *         description: Product successfully created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 name:
+ *                   type: string
+ *                 price:
+ *                   type: number
+ *                 categoryId:
+ *                   type: integer
+ *                 image:
+ *                   type: string
+ *                   nullable: true
  *       400:
  *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errors:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       msg:
+ *                         type: string
+ *       500:
+ *         description: Internal server error
  */
-router.post('/', upload.single('image'), [
+router.post('/products', upload.single('image'), [
     body('name').notEmpty().withMessage('Name is required'),
     body('price').isFloat({ gt: 0 }).withMessage('Price must be a positive number'),
     body('categoryId').isInt().withMessage('Category ID must be an integer')
@@ -161,25 +199,32 @@ router.post('/', upload.single('image'), [
  *       404:
  *         description: Product not found
  */
-router.put('/:id', [
-    body('name').optional().notEmpty().withMessage('Name cannot be empty'),
-    body('price').optional().isFloat({ gt: 0 }).withMessage('Price must be a positive number'),
-], async (req, res) => {
+router.put(
+  "/products/:id",
+  [
+    body("name").optional().notEmpty().withMessage("Name cannot be empty"),
+    body("price")
+      .optional()
+      .isFloat({ gt: 0 })
+      .withMessage("Price must be a positive number"),
+  ],
+  async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ errors: errors.array() });
     }
 
     try {
-        const product = await Product.findByPk(req.params.id);
-        if (!product) return res.status(404).json({ error: 'Product not found' });
+      const product = await Product.findByPk(req.params.id);
+      if (!product) return res.status(404).json({ error: "Product not found" });
 
-        await product.update(req.body);
-        res.status(200).json(product);
+      await product.update(req.body);
+      res.status(200).json(product);
     } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ error: "Internal server error" });
     }
-});
+  }
+);
 
 /**
  * @swagger
@@ -198,16 +243,16 @@ router.put('/:id', [
  *       404:
  *         description: Product not found
  */
-router.delete('/:id', async (req, res) => {
-    try {
-        const product = await Product.findByPk(req.params.id);
-        if (!product) return res.status(404).json({ error: 'Product not found' });
+router.delete("/products/:id", async (req, res) => {
+  try {
+    const product = await Product.findByPk(req.params.id);
+    if (!product) return res.status(404).json({ error: "Product not found" });
 
-        await product.destroy();
-        res.status(200).json({ message: 'Product deleted' });
-    } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
-    }
+    await product.destroy();
+    res.status(200).json({ message: "Product deleted" });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 module.exports = router;

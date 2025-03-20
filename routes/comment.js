@@ -1,12 +1,14 @@
 const express = require("express");
 const Comment = require("../models/comment");
-const {User} = require("../models/association");
+const { User, Product } = require("../models/association");
 const authenticate = require("../middleware/auth");
 const authorize = require("../middleware/role");
 
 const router = express.Router();
+
 /**
  * @swagger
+ * 
  * components:
  *   schemas:
  *     Comment:
@@ -14,37 +16,20 @@ const router = express.Router();
  *       properties:
  *         id:
  *           type: integer
- *         text:
- *           type: string
- *         star:
- *           type: integer
  *         userID:
  *           type: integer
- *         elonID:
+ *         productID:
  *           type: integer
- *         user:
- *           $ref: '#/components/schemas/User'
- *         elon:
- *           $ref: '#/components/schemas/Elon'
- *     User:
- *       type: object
- *       properties:
- *         id:
+ *         star:
  *           type: integer
- *         name:
- *           type: string
- *     Elon:
- *       type: object
- *       properties:
- *         id:
- *           type: integer
- *         title:
+ *         description:
  *           type: string
  */
 
+
 /**
  * @swagger
- * /api/comments:
+ * /comments:
  *   post:
  *     summary: Create a new comment
  *     tags: [Comments]
@@ -55,19 +40,19 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               text:
- *                 type: string
- *               star:
- *                 type: integer
  *               userID:
  *                 type: integer
- *               elonID:
+ *               productID:
  *                 type: integer
+ *               star:
+ *                 type: integer
+ *               description:
+ *                 type: string
  *     responses:
  *       201:
  *         description: Comment created successfully
  */
-router.post("/", authenticate, authorize("user"), async (req, res) => {
+router.post("/comments", authenticate, authorize("user"), async (req, res) => {
   try {
     const comment = await Comment.create(req.body);
     res.status(201).json(comment);
@@ -75,79 +60,21 @@ router.post("/", authenticate, authorize("user"), async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 });
+
 /**
  * @swagger
- * /api/comments:
+ * /comments:
  *   get:
- *     summary: Get all comments with filter, sort, and pagination
+ *     summary: Get all comments
  *     tags: [Comments]
- *     parameters:
- *       - in: query
- *         name: content
- *         schema:
- *           type: string
- *         description: Filter comments by content
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *           enum: [createdAt, updatedAt]
- *         description: Field to sort by
- *       - in: query
- *         name: order
- *         schema:
- *           type: string
- *           enum: [asc, desc]
- *         description: Sort order
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *         description: Page number
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *         description: Number of items per page
  *     responses:
  *       200:
  *         description: List of comments
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Comment'
  */
-router.get("/", async (req, res) => {
+router.get("/comments", async (req, res) => {
   try {
-    const {
-      content,
-      sortBy = "createdAt",
-      order = "desc",
-      page = 1,
-      limit = 10,
-    } = req.query;
-    const where = content ? { content: { [Op.like]: `%${content}%` } } : {};
-    const offset = (page - 1) * limit;
-
-    const comments = await Comment.findAndCountAll({
-      where,
-      order: [[sortBy, order]],
-      limit: parseInt(limit),
-      offset: parseInt(offset),
-      include: [{ model: User }, { model: Elon }],
-    });
-
-    res.status(200).json({
-      totalItems: comments.count,
-      totalPages: Math.ceil(comments.count / limit),
-      currentPage: parseInt(page),
-      data: comments.rows,
-    });
+    const comments = await Comment.findAll({ include: [User, Product] });
+    res.status(200).json(comments);
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
@@ -155,7 +82,33 @@ router.get("/", async (req, res) => {
 
 /**
  * @swagger
- * /api/comments/{id}:
+ * /comments/{id}:
+ *   get:
+ *     summary: Get a comment by ID
+ *     tags: [Comments]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Comment retrieved successfully
+ */
+router.get("/comments/:id", async (req, res) => {
+  try {
+    const comment = await Comment.findByPk(req.params.id, { include: [User, Product] });
+    if (!comment) return res.status(404).json({ message: "Comment not found" });
+    res.status(200).json(comment);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
+/**
+ * @swagger
+ * /comments/{id}:
  *   put:
  *     summary: Update a comment by ID
  *     tags: [Comments]
@@ -172,33 +125,28 @@ router.get("/", async (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               content:
+ *               star:
+ *                 type: integer
+ *               description:
  *                 type: string
  *     responses:
  *       200:
  *         description: Comment updated successfully
  */
-router.put(
-  "/:id",
-  authenticate,
-  authorize(["user", "super admin"]),
-  async (req, res) => {
-    try {
-      const comment = await Comment.findByPk(req.params.id);
-      if (!comment) {
-        return res.status(404).json({ message: "Comment not found" });
-      }
-      await comment.update(req.body);
-      res.status(200).json(comment);
-    } catch (error) {
-      res.status(500).json({ message: "Server error", error });
-    }
+router.put("comments/:id", authenticate, authorize("user"), async (req, res) => {
+  try {
+    const comment = await Comment.findByPk(req.params.id);
+    if (!comment) return res.status(404).json({ message: "Comment not found" });
+    await comment.update(req.body);
+    res.status(200).json(comment);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
   }
-);
+});
 
 /**
  * @swagger
- * /api/comments/{id}:
+ * /comments/{id}:
  *   delete:
  *     summary: Delete a comment by ID
  *     tags: [Comments]
@@ -212,12 +160,10 @@ router.put(
  *       200:
  *         description: Comment deleted successfully
  */
-router.delete("/:id", authenticate, authorize("user"), async (req, res) => {
+router.delete("/comments/:id", authenticate, authorize("user"), async (req, res) => {
   try {
     const comment = await Comment.findByPk(req.params.id);
-    if (!comment) {
-      return res.status(404).json({ message: "Comment not found" });
-    }
+    if (!comment) return res.status(404).json({ message: "Comment not found" });
     await comment.destroy();
     res.status(200).json({ message: "Comment deleted successfully" });
   } catch (error) {

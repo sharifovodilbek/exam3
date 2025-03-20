@@ -16,7 +16,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/regions:
+ * /regions:
  *   post:
  *     summary: Create a new region
  *     tags: [Regions]
@@ -33,7 +33,7 @@ const router = express.Router();
  *       201:
  *         description: Region created successfully
  */
-router.post("/", authenticate, authorize("admin"), async (req, res) => {
+router.post("/regions", async (req, res) => {
   try {
     const region = await Region.create(req.body);
     res.status(201).json(region);
@@ -44,7 +44,7 @@ router.post("/", authenticate, authorize("admin"), async (req, res) => {
 
 /**
  * @swagger
- * /api/regions:
+ * /regions:
  *   get:
  *     summary: Get all regions with filter, sort, and pagination
  *     tags: [Regions]
@@ -79,7 +79,7 @@ router.post("/", authenticate, authorize("admin"), async (req, res) => {
  *       200:
  *         description: List of regions
  */
-router.get("/", authenticate, async (req, res) => {
+router.get("/regions", authenticate, async (req, res) => {
   try {
     const { name, sortBy = "createdAt", order = "desc", page = 1, limit = 10 } = req.query;
 
@@ -110,7 +110,7 @@ router.get("/", authenticate, async (req, res) => {
 
 /**
  * @swagger
- * /api/regions/{id}:
+ * /regions/{id}:
  *   put:
  *     summary: Update a region by ID
  *     tags: [Regions]
@@ -133,7 +133,7 @@ router.get("/", authenticate, async (req, res) => {
  *       200:
  *         description: Region updated successfully
  */
-router.put("/:id", authenticate, authorize(["admin", "super admin"]), async (req, res) => {
+router.put("/regions/:id", authenticate, authorize(["admin", "super admin"]), async (req, res) => {
   try {
     const region = await Region.findByPk(req.params.id);
     if (!region) return res.status(404).json({ message: "Region not found" });
@@ -147,7 +147,7 @@ router.put("/:id", authenticate, authorize(["admin", "super admin"]), async (req
 
 /**
  * @swagger
- * /api/regions/{id}:
+ * /regions/{id}:
  *   delete:
  *     summary: Delete a region by ID
  *     tags: [Regions]
@@ -161,7 +161,7 @@ router.put("/:id", authenticate, authorize(["admin", "super admin"]), async (req
  *       200:
  *         description: Region deleted successfully
  */
-router.delete("/:id", authenticate, authorize("admin"), async (req, res) => {
+router.delete("/regions/:id", authenticate, authorize("admin"), async (req, res) => {
   try {
     const region = await Region.findByPk(req.params.id);
     if (!region) return res.status(404).json({ message: "Region not found" });

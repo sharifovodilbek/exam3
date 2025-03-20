@@ -7,13 +7,16 @@ const sendSMS = require("../config/sendSMS");
 const { sendEmail } = require("../config/sendEMAIL");
 const router = express.Router();
 const { totp, authenticator } = require("otplib");
+const multer = require("multer");
+const authorize = require("../middleware/role");
+const upload = multer({ dest: "uploads/" });
 
 totp.options = { step: 120 };
 authenticator.options = { step: 120 };
 
 /**
  * @swagger
- * /auth/send-otp-sms:
+ * /send-otp-sms:
  *   post:
  *     summary: Telefon raqamga OTP jo‘natish
  *     tags: [Users]
@@ -45,7 +48,7 @@ router.post("/send-otp-sms", async (req, res) => {
 
 /**
  * @swagger
- * /auth/send-otp-email:
+ * /send-otp-email:
  *   post:
  *     summary: Emailga OTP jo‘natish
  *     tags: [Users]
@@ -76,12 +79,11 @@ router.post("/send-otp-email", async (req, res) => {
   }
 });
 
-
 /**
  * @swagger
- * /auth/register:
+ * /verify-otp:
  *   post:
- *     summary: Yangi foydalanuvchi ro‘yxatdan o‘tkazish
+ *     summary: Verify OTP (Email yoki Telefon orqali)
  *     tags: [Users]
  *     requestBody:
  *       required: true
@@ -90,17 +92,27 @@ router.post("/send-otp-email", async (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               otp:
  *                 type: string
- *               password:
+ *                 example: "123456"
+ *               phone:
  *                 type: string
+ *                 example: "+998901234567"
  *               email:
  *                 type: string
+ *                 example: "user@example.com"
  *     responses:
- *       201:
- *         description: Ro‘yxatdan o‘tgan foydalanuvchi
+ *       200:
+ *         description: OTP muvaffaqiyatli tasdiqlandi
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: "Verifyed"
  *       400:
- *         description: Xato
+ *         description: Noto‘g‘ri ma’lumot yuborildi
+ *       500:
+ *         description: Server xatosi
  */
 
 router.post("/verify-otp", async (req, res) => {
@@ -118,14 +130,112 @@ router.post("/verify-otp", async (req, res) => {
   }
 });
 
-router.post("/register", async (req, res) => {
-  const { name, password, email } = req.body;
+/**
+ * @swagger
+ * /register:
+ *   post:
+ *     summary: Yangi foydalanuvchi ro‘yxatdan o‘tkazish
+ *     description: Foydalanuvchi ro‘yxatdan o‘tishi uchun kerakli ma’lumotlarni yuboradi.
+ *     tags:
+ *       - Users
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Foydalanuvchining ismi
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: Foydalanuvchining paroli (hashed)
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Foydalanuvchining elektron pochta manzili
+ *               phone:
+ *                 type: string
+ *                 description: Foydalanuvchining telefon raqami
+ *               regionId:
+ *                 type: integer
+ *                 description: Foydalanuvchining mintaqa ID si
+ *               year:
+ *                 type: string
+ *                 description: Tug‘ilgan yil
+ *               role:
+ *                 type: string
+ *                 description: Foydalanuvchi roli
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Foydalanuvchining profil rasmi (yuklanadigan fayl)
+ *     responses:
+ *       201:
+ *         description: Foydalanuvchi muvaffaqiyatli ro‘yxatdan o‘tkazildi
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   description: Foydalanuvchi ID si
+ *                 name:
+ *                   type: string
+ *                   description: Foydalanuvchining ismi
+ *                 email:
+ *                   type: string
+ *                   format: email
+ *                   description: Foydalanuvchining email manzili
+ *                 phone:
+ *                   type: string
+ *                   description: Telefon raqami
+ *                 regionId:
+ *                   type: integer
+ *                   description: Mintaqa ID si
+ *                 year:
+ *                   type: string
+ *                   description: Tug‘ilgan yil
+ *                 role:
+ *                   type: string
+ *                   description: Foydalanuvchi roli
+ *                 image:
+ *                   type: string
+ *                   nullable: true
+ *                   description: Foydalanuvchi rasmi (fayl yo‘li)
+ *       400:
+ *         description: Xatolik (foydalanuvchi allaqachon mavjud yoki noto‘g‘ri ma’lumotlar)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Xatolik haqida ma’lumot
+ *       500:
+ *         description: Server xatosi
+ */
+
+router.post("/register", upload.single("image"), async (req, res) => {
+  const { name, password, email, ...rest } = req.body;
+  const image = req.file ? req.file.path : null;
   try {
     const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) return res.status(400).json({ error: "User already exists" });
+    if (existingUser)
+      return res.status(400).json({ error: "User already exists" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, password: hashedPassword, email });
+    const user = await User.create({
+      name,
+      password: hashedPassword,
+      email,
+      image,
+      ...rest,
+    });
 
     res.status(201).json(user);
   } catch (error) {
@@ -135,50 +245,77 @@ router.post("/register", async (req, res) => {
 
 /**
  * @swagger
- * /auth/login:
+ * /login:
  *   post:
- *     summary: Foydalanuvchi tizimga kirishi
- *     tags: [Users]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *               password:
- *                 type: string
+ *     summary: Foydalanuvchini tizimga kirishi
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: query
+ *         name: email
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Foydalanuvchi emaili
+ *         example: "user@example.com"
+ *       - in: query
+ *         name: password
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Foydalanuvchi paroli
+ *         example: "yourpassword"
  *     responses:
  *       200:
- *         description: Muvaffaqiyatli login
+ *         description: Muvaffaqiyatli tizimga kirish
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                   description: JWT token
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     name:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     role:
+ *                       type: string
  *       400:
- *         description: Xato parol
+ *         description: Noto‘g‘ri parol
  *       404:
  *         description: Foydalanuvchi topilmadi
+ *       500:
+ *         description: Server xatosi
  */
+
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.query;
+
     const user = await User.findOne({ where: { email } });
     if (!user) return res.status(404).json({ error: "User topilmadi" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ error: "Parol xato" });
+    if (!isMatch) return res.status(400).json({ error: "Noto'g'ri parol" });
 
-    const token = jwt.sign({ id: user.id, role: user.role }, "secret_key", { expiresIn: "1h" });
+    const token = jwt.sign({ id: user.id, role: user.role }, "secret_key", {
+      expiresIn: "1h",
+    });
     res.json({ token, user });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-module.exports = router;
-
 /**
  * @swagger
- * /users:
+ * /getUsers:
  *   get:
  *     summary: Foydalanuvchilarni olish
  *     tags: [Users]
@@ -208,9 +345,15 @@ module.exports = router;
  *       200:
  *         description: Foydalanuvchilar ro‘yxati
  */
-router.get("/", async (req, res) => {
+router.get("/getUsers", async (req, res) => {
   try {
-    const { page = 1, limit = 10, sort = "createdAt", order = "DESC", role } = req.query;
+    const {
+      page = 1,
+      limit = 10,
+      sort = "createdAt",
+      order = "DESC",
+      role,
+    } = req.query;
     const whereCondition = {};
 
     if (role) whereCondition.role = role;
@@ -235,7 +378,7 @@ router.get("/", async (req, res) => {
 
 /**
  * @swagger
- * /users/{id}:
+ * /getUserById/{id}:
  *   get:
  *     summary: Foydalanuvchini ID bo‘yicha olish
  *     tags: [Users]
@@ -251,7 +394,7 @@ router.get("/", async (req, res) => {
  *       404:
  *         description: Foydalanuvchi topilmadi
  */
-router.get("/:id", async (req, res) => {
+router.get("/getUserById/:id", async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
     if (!user) return res.status(404).json({ error: "User topilmadi" });
@@ -263,7 +406,7 @@ router.get("/:id", async (req, res) => {
 
 /**
  * @swagger
- * /users/{id}:
+ * /updateUser/{id}:
  *   put:
  *     summary: Foydalanuvchini yangilash
  *     tags: [Users]
@@ -288,7 +431,7 @@ router.get("/:id", async (req, res) => {
  *       200:
  *         description: Yangilangan foydalanuvchi
  */
-router.put("/:id", async (req, res) => {
+router.put("/updateUser/:id", async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
     if (!user) return res.status(404).json({ error: "User topilmadi" });
@@ -301,7 +444,7 @@ router.put("/:id", async (req, res) => {
 
 /**
  * @swagger
- * /users/{id}:
+ * /deleteUser/{id}:
  *   delete:
  *     summary: Foydalanuvchini o‘chirish
  *     tags: [Users]
@@ -315,12 +458,12 @@ router.put("/:id", async (req, res) => {
  *       200:
  *         description: Foydalanuvchi o‘chirildi
  */
-router.delete("/:id", async (req, res) => {
+router.delete("/deleteUser/:id", async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
     if (!user) return res.status(404).json({ error: "User topilmadi" });
     await user.destroy();
-    res.json({ message: "User o‘chirildi" });
+    res.json({ message: "User o'chirildi" , user: user});
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
