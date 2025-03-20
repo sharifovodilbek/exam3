@@ -1,8 +1,8 @@
-const express = require('express');
-const { body, validationResult } = require('express-validator');
-const { Op } = require('sequelize');
-const { Product } = require('../models/association');
-const multer = require('multer');
+const express = require("express");
+const { body, validationResult } = require("express-validator");
+const { Op } = require("sequelize");
+const { Product } = require("../models/association");
+const multer = require("multer");
 
 const upload = multer({ dest: "uploads/" });
 const router = express.Router();
@@ -12,7 +12,8 @@ const router = express.Router();
  * /products:
  *   get:
  *     summary: Get all products with pagination, sorting, and filtering
- *     parameters:
+ *     tags: [Products]
+ *      parameters:
  *       - in: query
  *         name: page
  *         schema:
@@ -65,6 +66,7 @@ router.get("/", async (req, res) => {
  * /products/{id}:
  *   get:
  *     summary: Get a product by ID
+ *     tags: [Products]
  *     parameters:
  *       - in: path
  *         name: id
@@ -93,6 +95,7 @@ router.get("/:id", async (req, res) => {
  * /products:
  *   post:
  *     summary: Create a new product
+ *     tags: [Products]
  *     requestBody:
  *       required: true
  *       content:
@@ -150,32 +153,40 @@ router.get("/:id", async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-router.post('/', upload.single('image'), [
-    body('name').notEmpty().withMessage('Name is required'),
-    body('price').isFloat({ gt: 0 }).withMessage('Price must be a positive number'),
-    body('categoryId').isInt().withMessage('Category ID must be an integer')
-], async (req, res) => {
+router.post(
+  "/",
+  upload.single("image"),
+  [
+    body("name").notEmpty().withMessage("Name is required"),
+    body("price")
+      .isFloat({ gt: 0 })
+      .withMessage("Price must be a positive number"),
+    body("categoryId").isInt().withMessage("Category ID must be an integer"),
+  ],
+  async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ errors: errors.array() });
     }
 
     try {
-        const { name, price, categoryId } = req.body;
-        const image = req.file ? req.file.path : null;
-        const product = await Product.create({ name, price, categoryId, image });
+      const { name, price, categoryId } = req.body;
+      const image = req.file ? req.file.path : null;
+      const product = await Product.create({ name, price, categoryId, image });
 
-        res.status(201).json(product);
+      res.status(201).json(product);
     } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ error: "Internal server error" });
     }
-});
+  }
+);
 
 /**
  * @swagger
  * /products/{id}:
  *   put:
  *     summary: Update a product
+ *     tags: [Products]
  *     parameters:
  *       - in: path
  *         name: id
@@ -231,6 +242,7 @@ router.put(
  * /products/{id}:
  *   delete:
  *     summary: Delete a product
+ *     tags: [Products]
  *     parameters:
  *       - in: path
  *         name: id
