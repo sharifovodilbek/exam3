@@ -10,7 +10,8 @@ const router = express.Router();
  * /getOrders:
  *   get:
  *     summary: Get all orders with pagination, sorting, and filtering
- *     tags: [Orders]
+ *     tags:
+ *       - Orders
  *     parameters:
  *       - in: query
  *         name: page
@@ -62,7 +63,8 @@ router.get("/getOrders", async (req, res) => {
  * /getOrdersById/{id}:
  *   get:
  *     summary: Get an order by ID
- *      tags: [Orders]
+ *     tags:
+ *       - Orders
  *     parameters:
  *       - in: path
  *         name: id
@@ -91,7 +93,8 @@ router.get("/getOrdersById/:id", async (req, res) => {
  * /createOrder:
  *   post:
  *     summary: Create a new order
- *      tags: [Orders]
+ *     tags:
+ *       - Orders
  *     requestBody:
  *       required: true
  *       content:
@@ -132,7 +135,8 @@ router.post(
  * /deleteOrdersById/{id}:
  *   delete:
  *     summary: Delete an order
- *     tags: [Orders]
+ *     tags:
+ *       - Orders
  *     parameters:
  *       - in: path
  *         name: id

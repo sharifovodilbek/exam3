@@ -13,7 +13,7 @@ const router = express.Router();
  *   get:
  *     summary: Get all products with pagination, sorting, and filtering
  *     tags: [Products]
- *      parameters:
+ *     parameters:
  *       - in: query
  *         name: page
  *         schema:
@@ -153,11 +153,17 @@ router.get("products/:id", async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-router.post('/products', upload.single('image'), [
-    body('name').notEmpty().withMessage('Name is required'),
-    body('price').isFloat({ gt: 0 }).withMessage('Price must be a positive number'),
-    body('categoryId').isInt().withMessage('Category ID must be an integer')
-], async (req, res) => {
+router.post(
+  "/products",
+  upload.single("image"),
+  [
+    body("name").notEmpty().withMessage("Name is required"),
+    body("price")
+      .isFloat({ gt: 0 })
+      .withMessage("Price must be a positive number"),
+    body("categoryId").isInt().withMessage("Category ID must be an integer"),
+  ],
+  async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
