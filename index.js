@@ -60,4 +60,4 @@ const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 connectDb();
-app.listen(3000, () => console.log("server started on port 3000"));
+app.listen(3001, () => console.log("server started on port 3000"));
