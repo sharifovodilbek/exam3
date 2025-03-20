@@ -1,14 +1,13 @@
 const express = require("express");
-const Comment = require("../models/comment");
-const { User, Product } = require("../models/association");
+const { Comment, Product } = require("../models/association");
 const authenticate = require("../middleware/auth");
-const authorize = require("../middleware/role");
+const { authorize } = require("../middleware/role");
 
 const router = express.Router();
 
 /**
  * @swagger
- * 
+ *
  * components:
  *   schemas:
  *     Comment:
@@ -16,16 +15,15 @@ const router = express.Router();
  *       properties:
  *         id:
  *           type: integer
- *         userID:
+ *         userId:
  *           type: integer
- *         productID:
+ *         productId:
  *           type: integer
  *         star:
  *           type: integer
  *         description:
  *           type: string
  */
-
 
 /**
  * @swagger
@@ -40,9 +38,9 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               userID:
+ *               userId:
  *                 type: integer
- *               productID:
+ *               productId:
  *                 type: integer
  *               star:
  *                 type: integer
@@ -52,14 +50,27 @@ const router = express.Router();
  *       201:
  *         description: Comment created successfully
  */
-router.post("/comments", authenticate, authorize("user"), async (req, res) => {
-  try {
-    const comment = await Comment.create(req.body);
-    res.status(201).json(comment);
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+router.post(
+  "/comments",
+  authenticate,
+  authorize(["user", "admin", "seller"]),
+  async (req, res) => {
+    const { userId, productId, star, description } = req.body;
+    try {
+      const comment = await Comment.create({
+        userId,
+        productId,
+        star,
+        description,
+      });
+      res.status(201).json(comment);
+    } catch (error) {
+      console.log(error);
+
+      res.status(500).json({ message: "Server error", error });
+    }
   }
-});
+);
 
 /**
  * @swagger
@@ -73,7 +84,9 @@ router.post("/comments", authenticate, authorize("user"), async (req, res) => {
  */
 router.get("/comments", async (req, res) => {
   try {
-    const comments = await Comment.findAll({ include: [User, Product] });
+    const comments = await Comment.findAll({
+      include: [{ model: Product, attributes: ["id", "name"] }],
+    });
     res.status(200).json(comments);
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
@@ -98,7 +111,9 @@ router.get("/comments", async (req, res) => {
  */
 router.get("/comments/:id", async (req, res) => {
   try {
-    const comment = await Comment.findByPk(req.params.id, { include: [User, Product] });
+    const comment = await Comment.findByPk(req.params.id, {
+      include: [{ model: Product, attributes: ["id", "name"] }],
+    });
     if (!comment) return res.status(404).json({ message: "Comment not found" });
     res.status(200).json(comment);
   } catch (error) {
@@ -133,16 +148,22 @@ router.get("/comments/:id", async (req, res) => {
  *       200:
  *         description: Comment updated successfully
  */
-router.put("comments/:id", authenticate, authorize("user"), async (req, res) => {
-  try {
-    const comment = await Comment.findByPk(req.params.id);
-    if (!comment) return res.status(404).json({ message: "Comment not found" });
-    await comment.update(req.body);
-    res.status(200).json(comment);
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+router.put(
+  "/comments/:id",
+  authenticate,
+  authorize(["super admin", "admin","user"]),
+  async (req, res) => {
+    try {
+      const comment = await Comment.findByPk(req.params.id);
+      if (!comment)
+        return res.status(404).json({ message: "Comment not found" });
+      await comment.update(req.body);
+      res.status(200).json(comment);
+    } catch (error) {
+      res.status(500).json({ message: "Server error", error });
+    }
   }
-});
+);
 
 /**
  * @swagger
@@ -160,15 +181,21 @@ router.put("comments/:id", authenticate, authorize("user"), async (req, res) => 
  *       200:
  *         description: Comment deleted successfully
  */
-router.delete("/comments/:id", authenticate, authorize("user"), async (req, res) => {
-  try {
-    const comment = await Comment.findByPk(req.params.id);
-    if (!comment) return res.status(404).json({ message: "Comment not found" });
-    await comment.destroy();
-    res.status(200).json({ message: "Comment deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+router.delete(
+  "/comments/:id",
+  authenticate,
+  authorize(["user", "admin", "seller"]),
+  async (req, res) => {
+    try {
+      const comment = await Comment.findByPk(req.params.id);
+      if (!comment)
+        return res.status(404).json({ message: "Comment not found" });
+      await comment.destroy();
+      res.status(200).json({ message: "Comment deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Server error", error });
+    }
   }
-});
+);
 
 module.exports = router;

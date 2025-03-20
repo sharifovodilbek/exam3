@@ -2,14 +2,14 @@ const express = require("express");
 const { db, connectDb } = require("./config/db");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const User = require("./routes/user");
-const Region = require("./routes/region");
-const Comment = require("./routes/comment");
+const User = require("./routes/user.routes");
+const Region = require("./routes/region.routes");
+const Comment = require("./routes/comment.routes");
 const logger = require("./middleware/logger");
-const Product = require("./routes/product");
-const Category = require("./routes/category");
-const Order = require("./routes/order");
-const orderItem = require("./routes/orderItem");
+const Product = require("./routes/product.routes");
+const Category = require("./routes/category.routes");
+const Order = require("./routes/order.routes");
+const orderItem = require("./routes/orderItem.routes");
 
 const app = express();
 app.use(logger);
@@ -46,13 +46,13 @@ const swaggerOptions = {
   apis: ["./routes/*.js"],
 };
 
-app.use("/api", User);
-app.use("/api/regions", Region);
-app.use("/api/comments", Comment);
-app.use("/api/products", Product);
-app.use("/api/categories", Category);
-app.use("/api/orders", Order);
-app.use("/api/orderItems", orderItem);
+app.use("/api/", User);
+app.use("/api/", Region);
+app.use("/api/", Comment);
+app.use("/api/", Product);
+app.use("/api/", Category);
+app.use("/api/", Order);
+app.use("/api/", orderItem);
 app.use("/uploads", express.static("uploads"));
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);

@@ -3,6 +3,8 @@ const { body, validationResult } = require("express-validator");
 const { Op } = require("sequelize");
 const { Product } = require("../models/association");
 const multer = require("multer");
+const { authorize } = require("../middleware/role");
+const authenticate = require("../middleware/auth");
 
 const upload = multer({ dest: "uploads/" });
 const router = express.Router();
@@ -79,7 +81,7 @@ router.get("/products", async (req, res) => {
  *       404:
  *         description: Product not found
  */
-router.get("products/:id", async (req, res) => {
+router.get("/products/:id", async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id);
     if (!product) return res.status(404).json({ error: "Product not found" });
@@ -108,11 +110,13 @@ router.get("products/:id", async (req, res) => {
  *                 description: Name of the product
  *               price:
  *                 type: number
- *                 format: float
  *                 description: Price of the product (must be a positive number)
  *               categoryId:
  *                 type: integer
  *                 description: Category ID associated with the product
+ *               userId:
+ *                 type: integer
+ *                 description: User ID associated with the product
  *               image:
  *                 type: string
  *                 format: binary
@@ -130,12 +134,13 @@ router.get("products/:id", async (req, res) => {
  *                 name:
  *                   type: string
  *                 price:
- *                   type: number
+ *                   type: integer
  *                 categoryId:
+ *                   type: integer
+ *                 userId:
  *                   type: integer
  *                 image:
  *                   type: string
- *                   nullable: true
  *       400:
  *         description: Validation error
  *         content:
@@ -153,29 +158,40 @@ router.get("products/:id", async (req, res) => {
  *       500:
  *         description: Internal server error
  */
+
 router.post(
   "/products",
+  authenticate,
+  authorize(["admin", "seller"]),
   upload.single("image"),
-  [
-    body("name").notEmpty().withMessage("Name is required"),
-    body("price")
-      .isFloat({ gt: 0 })
-      .withMessage("Price must be a positive number"),
-    body("categoryId").isInt().withMessage("Category ID must be an integer"),
-  ],
+  // [
+  //   body("name").notEmpty().withMessage("Name is required"),
+  //   body("price")
+  //     .isFloat({ gt: 0 })
+  //     .withMessage("Price must be a positive number"),
+  //   body("categoryId").isInt().withMessage("Category ID must be an integer"),
+  // ],
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+    // const errors = validationResult(req);
+    // if (!errors.isEmpty()) {
+    //   return res.status(400).json({ errors: errors.array() });
+    // }
 
     try {
-      const { name, price, categoryId } = req.body;
+      const { name, price, categoryId, userId } = req.body;
       const image = req.file ? req.file.path : null;
-      const product = await Product.create({ name, price, categoryId, image });
+      const product = await Product.create({
+        name,
+        price,
+        categoryId,
+        userId,
+        image,
+      });
 
       res.status(201).json(product);
     } catch (error) {
+      console.log(error);
+
       res.status(500).json({ error: "Internal server error" });
     }
   }
@@ -212,6 +228,8 @@ router.post(
  */
 router.put(
   "/products/:id",
+  authenticate,
+  authorize(["admin", "seller"]),
   [
     body("name").optional().notEmpty().withMessage("Name cannot be empty"),
     body("price")
@@ -255,16 +273,21 @@ router.put(
  *       404:
  *         description: Product not found
  */
-router.delete("/products/:id", async (req, res) => {
-  try {
-    const product = await Product.findByPk(req.params.id);
-    if (!product) return res.status(404).json({ error: "Product not found" });
+router.delete(
+  "/products/:id",
+  authenticate,
+  authorize(["admin", "seller"]),
+  async (req, res) => {
+    try {
+      const product = await Product.findByPk(req.params.id);
+      if (!product) return res.status(404).json({ error: "Product not found" });
 
-    await product.destroy();
-    res.status(200).json({ message: "Product deleted" });
-  } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
+      await product.destroy();
+      res.status(200).json({ message: "Product deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
-});
+);
 
 module.exports = router;

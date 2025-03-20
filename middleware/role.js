@@ -11,5 +11,5 @@ function authorize(roles) {
     };
   }
   
-module.exports = authorize;
+module.exports = {authorize};
   

@@ -1,5 +1,6 @@
 const { Op } = require("sequelize");
-const checkRole = require("../middleware/role");
+const {authorize} = require("../middleware/role");
+const authenticate = require("../middleware/auth");
 const { Category } = require("../models/association");
 
 const express = require("express");
@@ -36,7 +37,7 @@ const router = express.Router();
  *         description: List of categories
  */
 
-router.get("/", async (req, res) => {
+router.get("/categories", async (req, res) => {
   try {
     let { page = 1, limit = 10, sort = "asc", search = "" } = req.query;
     page = parseInt(page);
@@ -81,7 +82,7 @@ router.get("/", async (req, res) => {
  *       404:
  *         description: Category not found
  */
-router.get("/:id", async (req, res) => {
+router.get("/categories/:id", async (req, res) => {
   try {
     const category = await Category.findByPk(req.params.id);
     if (!category) return res.status(404).json({ error: "Category not found" });
@@ -115,7 +116,7 @@ router.get("/:id", async (req, res) => {
  *         description: Validation error
  */
 router.post(
-  "/",
+  "/categories",authenticate, authorize(["admin"]),
   [body("name").notEmpty().withMessage("Name is required")],
   async (req, res) => {
     const errors = validationResult(req);
@@ -167,7 +168,7 @@ router.post(
  *       404:
  *         description: Category not found
  */
-router.put("/:id", async (req, res) => {
+router.put("/categories/:id",authenticate, authorize(["admin","super admin"]), async (req, res) => {
   try {
     const category = await Category.findByPk(req.params.id);
     if (!category) return res.status(404).json({ error: "Category not found" });
@@ -198,7 +199,7 @@ router.put("/:id", async (req, res) => {
  *       404:
  *         description: Category not found
  */
-router.delete("/:id", async (req, res) => {
+router.delete("/categories/:id",authenticate, authorize(["admin"]), async (req, res) => {
   try {
     const category = await Category.findByPk(req.params.id);
     if (!category) return res.status(404).json({ error: "Category not found" });

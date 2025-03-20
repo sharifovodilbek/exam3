@@ -18,11 +18,11 @@ const Comment = db.define(
       allowNull: false,
     },
     description: {
-      type: DataTypes.TEXT,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     star: {
-      type: DataTypes.DECIMAL,
+      type: DataTypes.FLOAT,
       allowNull: false,
     },
   },

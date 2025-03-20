@@ -1,7 +1,9 @@
 const express = require("express");
 const { body, validationResult } = require("express-validator");
 const { Op } = require("sequelize");
-const { Order } = require("../models/association");
+const { Order, OrderItem, User } = require("../models/association");
+const authenticate = require("../middleware/auth");
+const { authorize } = require("../middleware/role");
 
 const router = express.Router();
 
@@ -49,6 +51,7 @@ router.get("/getOrders", async (req, res) => {
       where: whereCondition,
       limit,
       offset,
+      include: [{ model: User }, { model: OrderItem }],
       order: [["createdAt", sort]],
     });
 
@@ -112,6 +115,8 @@ router.get("/getOrdersById/:id", async (req, res) => {
  */
 router.post(
   "/createOrder",
+  authenticate,
+  authorize(["admin"]),
   [body("userId").isInt().withMessage("User ID must be an integer")],
   async (req, res) => {
     const errors = validationResult(req);
@@ -149,16 +154,21 @@ router.post(
  *       404:
  *         description: Order not found
  */
-router.delete("/deleteOrdersById/:id", async (req, res) => {
-  try {
-    const order = await Order.findByPk(req.params.id);
-    if (!order) return res.status(404).json({ error: "Order not found" });
+router.delete(
+  "/deleteOrdersById/:id",
+  authenticate,
+  authorize(["admin"]),
+  async (req, res) => {
+    try {
+      const order = await Order.findByPk(req.params.id);
+      if (!order) return res.status(404).json({ error: "Order not found" });
 
-    await order.destroy();
-    res.status(200).json({ message: "Order deleted" });
-  } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
+      await order.destroy();
+      res.status(200).json({ message: "Order deleted" });
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
-});
+);
 
 module.exports = router;

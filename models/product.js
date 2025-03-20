@@ -1,4 +1,3 @@
-
 const { db } = require("../config/db");
 const { DataTypes } = require("sequelize");
 
@@ -15,11 +14,11 @@ const Product = db.define(
       allowNull: false,
     },
     price: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     image: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     categoryId: {
@@ -27,12 +26,12 @@ const Product = db.define(
       allowNull: false,
     },
     userId: {
-        type:DataTypes.INTEGER,
-        allowNull:false
-    }
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
   },
   {
     timestamps: true,
   }
 );
-module.exports= Product;
+module.exports = Product;

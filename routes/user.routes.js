@@ -8,7 +8,7 @@ const { sendEmail } = require("../config/sendEMAIL");
 const router = express.Router();
 const { totp, authenticator } = require("otplib");
 const multer = require("multer");
-const authorize = require("../middleware/role");
+const {authorize} = require("../middleware/role");
 const upload = multer({ dest: "uploads/" });
 
 totp.options = { step: 120 };

@@ -7,9 +7,9 @@
 
 const express = require("express");
 const Region = require("../models/region");
-const {User} = require("../models/association");
+const { User } = require("../models/association");
 const authenticate = require("../middleware/auth");
-const authorize = require("../middleware/role");
+const { authorize } = require("../middleware/role");
 const { Op } = require("sequelize");
 
 const router = express.Router();
@@ -79,9 +79,15 @@ router.post("/regions", async (req, res) => {
  *       200:
  *         description: List of regions
  */
-router.get("/regions", authenticate, async (req, res) => {
+router.get("/regions", async (req, res) => {
   try {
-    const { name, sortBy = "createdAt", order = "desc", page = 1, limit = 10 } = req.query;
+    const {
+      name,
+      sortBy = "createdAt",
+      order = "desc",
+      page = 1,
+      limit = 10,
+    } = req.query;
 
     const where = {};
     if (name) {
@@ -133,17 +139,22 @@ router.get("/regions", authenticate, async (req, res) => {
  *       200:
  *         description: Region updated successfully
  */
-router.put("/regions/:id", authenticate, authorize(["admin", "super admin"]), async (req, res) => {
-  try {
-    const region = await Region.findByPk(req.params.id);
-    if (!region) return res.status(404).json({ message: "Region not found" });
+router.put(
+  "/regions/:id",
+  authenticate,
+  authorize(["admin", "super admin"]),
+  async (req, res) => {
+    try {
+      const region = await Region.findByPk(req.params.id);
+      if (!region) return res.status(404).json({ message: "Region not found" });
 
-    await region.update(req.body);
-    res.status(200).json(region);
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+      await region.update(req.body);
+      res.status(200).json(region);
+    } catch (error) {
+      res.status(500).json({ message: "Server error", error });
+    }
   }
-});
+);
 
 /**
  * @swagger
@@ -161,16 +172,21 @@ router.put("/regions/:id", authenticate, authorize(["admin", "super admin"]), as
  *       200:
  *         description: Region deleted successfully
  */
-router.delete("/regions/:id", authenticate, authorize("admin"), async (req, res) => {
-  try {
-    const region = await Region.findByPk(req.params.id);
-    if (!region) return res.status(404).json({ message: "Region not found" });
+router.delete(
+  "/regions/:id",
+  authenticate,
+  authorize("admin"),
+  async (req, res) => {
+    try {
+      const region = await Region.findByPk(req.params.id);
+      if (!region) return res.status(404).json({ message: "Region not found" });
 
-    await region.destroy();
-    res.status(200).json({ message: "Region deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+      await region.destroy();
+      res.status(200).json({ message: "Region deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Server error", error });
+    }
   }
-});
+);
 
 module.exports = router;

@@ -1,7 +1,10 @@
 const express = require("express");
 const { body, validationResult } = require("express-validator");
 const { Op } = require("sequelize");
-const { OrderItem } = require("../models/association");
+const { OrderItem,Product } = require("../models/association");
+const { authPlugins } = require("mysql2");
+const authenticate = require("../middleware/auth");
+const { authorize } = require("../middleware/role");
 
 const router = express.Router();
 
@@ -40,6 +43,7 @@ router.get("/getOrder-items", async (req, res) => {
     limit = parseInt(limit);
     const offset = (page - 1) * limit;
 
+
     const whereCondition = search
       ? {
           [Op.or]: [
@@ -50,9 +54,11 @@ router.get("/getOrder-items", async (req, res) => {
       : {};
 
     const orderItems = await OrderItem.findAndCountAll({
+      
       where: whereCondition,
       limit,
       offset,
+      include:[{model:Product}],
       order: [["createdAt", sort]],
     });
 
@@ -117,8 +123,7 @@ router.get("/getOrder-itemsById/:id", async (req, res) => {
  *       400:
  *         description: Validation error
  */
-router.post(
-  "/createOrderItem",
+router.post("/createOrderItem",authenticate, authorize(["admin"]),
   [
     body("orderId").isInt().withMessage("Order ID must be an integer"),
     body("productId").isInt().withMessage("Product ID must be an integer"),
@@ -158,7 +163,7 @@ router.post(
  *       404:
  *         description: Order item not found
  */
-router.delete("/orderDeleteById/:id", async (req, res) => {
+router.delete("/orderDeleteById/:id",authenticate, authorize(["admin"]), async (req, res) => {
   try {
     const orderItem = await OrderItem.findByPk(req.params.id);
     if (!orderItem)
