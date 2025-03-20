@@ -1,11 +1,67 @@
 const express = require("express");
 const { body, validationResult } = require("express-validator");
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 const { Order, OrderItem, User } = require("../models/association");
 const authenticate = require("../middleware/auth");
 const { authorize } = require("../middleware/role");
 
 const router = express.Router();
+
+/**
+ * @swagger
+ * /getMyOrders:
+ *   get:
+ *     summary: Foydalanuvchining buyurtmalarini olish
+ *     tags: [Orders]
+ *     security:
+ *     responses:
+ *       200:
+ *         description: Foydalanuvchining barcha buyurtmalari
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   userId:
+ *                     type: integer
+ *                   status:
+ *                     type: string
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                   updatedAt:
+ *                     type: string
+ *                     format: date-time
+ *       404:
+ *         description: Buyurtmalar topilmadi
+ *       401:
+ *         description: Autentifikatsiya talab qilinadi
+ *       500:
+ *         description: Ichki server xatosi
+ */
+
+router.get("/getMyOrders", authenticate, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    console.log(userId);
+
+    const orders = await Order.findAll({
+      where: { userId },
+    });
+
+    if (orders.length === 0) {
+      return res.status(404).json({ error: "No orders found for this user" });
+    }
+
+    res.status(200).json(orders);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 /**
  * @swagger
@@ -170,5 +226,7 @@ router.delete(
     }
   }
 );
+
+
 
 module.exports = router;

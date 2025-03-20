@@ -8,7 +8,7 @@ const { sendEmail } = require("../config/sendEMAIL");
 const router = express.Router();
 const { totp, authenticator } = require("otplib");
 const multer = require("multer");
-const {authorize} = require("../middleware/role");
+const { authorize } = require("../middleware/role");
 const upload = multer({ dest: "uploads/" });
 
 totp.options = { step: 120 };
@@ -304,10 +304,21 @@ router.post("/login", async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: "Noto'g'ri parol" });
 
-    const token = jwt.sign({ id: user.id, role: user.role }, "secret_key", {
-      expiresIn: "1h",
-    });
-    res.json({ token, user });
+    const accessToken = jwt.sign(
+      { id: user.id, role: user.role },
+      "secret_key",
+      {
+        expiresIn: "1h",
+      }
+    );
+    const refreshToken = jwt.sign(
+      { id: user.id, role: user.role },
+      "secret_key",
+      {
+        expiresIn: "7d",
+      }
+    );
+    res.json({ accessToken, user, refreshToken });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -463,9 +474,55 @@ router.delete("/deleteUser/:id", async (req, res) => {
     const user = await User.findByPk(req.params.id);
     if (!user) return res.status(404).json({ error: "User topilmadi" });
     await user.destroy();
-    res.json({ message: "User o'chirildi" , user: user});
+    res.json({ message: "User o'chirildi", user: user });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /refresh:
+ *   post:
+ *     summary: Refresh token
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Refresh token created
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Invalid token
+ */
+router.post("/refresh", async (req, res) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) {
+    return res.status(400).json({ error: "Refresh token is required" });
+  }
+
+  try {
+    const token = await jwt.verify(refreshToken, "secret_key");
+
+    const accessToken = jwt.sign(
+      { id: token.id, role: token.role },
+      "secret_key",
+      {
+        expiresIn: "1h",
+      }
+    );
+    res.status(201).json({ accessToken });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
