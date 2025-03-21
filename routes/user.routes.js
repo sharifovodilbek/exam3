@@ -486,7 +486,7 @@ router.delete("/deleteUser/:id", async (req, res) => {
  *   post:
  *     summary: Refresh token
  *     tags:
- *       - Auth
+ *       - Users
  *     requestBody:
  *       required: true
  *       content:
