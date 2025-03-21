@@ -24,6 +24,7 @@ const User = db.define(
     phone: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
     },
     image: {
       type: DataTypes.STRING,
