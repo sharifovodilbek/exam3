@@ -124,7 +124,7 @@ router.get("/comments/:id", async (req, res) => {
 /**
  * @swagger
  * /comments/{id}:
- *   put:
+ *   patch:
  *     summary: Update a comment by ID
  *     tags: [Comments]
  *     parameters:
@@ -148,7 +148,7 @@ router.get("/comments/:id", async (req, res) => {
  *       200:
  *         description: Comment updated successfully
  */
-router.put(
+router.patch(
   "/comments/:id",
   authenticate,
   authorize(["super admin", "admin","user"]),

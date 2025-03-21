@@ -33,7 +33,7 @@ const router = express.Router();
  *       201:
  *         description: Region created successfully
  */
-router.post("/regions", async (req, res) => {
+router.post("/regions",authenticate,authorize(["admin","user","seller"]), async (req, res) => {
   try {
     const region = await Region.create(req.body);
     res.status(201).json(region);
@@ -117,7 +117,7 @@ router.get("/regions", async (req, res) => {
 /**
  * @swagger
  * /regions/{id}:
- *   put:
+ *   patch:
  *     summary: Update a region by ID
  *     tags: [Regions]
  *     parameters:
@@ -139,7 +139,7 @@ router.get("/regions", async (req, res) => {
  *       200:
  *         description: Region updated successfully
  */
-router.put(
+router.patch(
   "/regions/:id",
   authenticate,
   authorize(["admin", "super admin"]),
