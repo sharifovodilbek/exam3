@@ -10,7 +10,6 @@ const logger = require("./middleware/logger");
 const Product = require("./routes/product.routes");
 const Category = require("./routes/category.routes");
 const Order = require("./routes/order.routes");
-const orderItem = require("./routes/orderItem.routes");
 const path = require("path");
 
 
@@ -55,7 +54,6 @@ app.use("/api/", Comment);
 app.use("/api/", Product);
 app.use("/api/", Category);
 app.use("/api/", Order);
-app.use("/api/", orderItem);
 app.use("/api/", uploads);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -66,8 +64,3 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 connectDb();
 app.listen(3000, () => console.log("server started on port 3000"));
 
-
-//userId jwt dan olinsin
-//ordersda productId va count arrayda beriladi
-//user get qilishda role admin sorashi kerak
-//swagger data korinishida mas
