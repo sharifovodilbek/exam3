@@ -15,7 +15,7 @@ User.hasMany(Order, { foreignKey: "userId" });
 Order.belongsTo(User, { foreignKey: "userId" });
 
 // ? order va orderItem ulandi
-Order.hasMany(OrderItem, { foreignKey: "orderId" });
+Order.hasMany(OrderItem, { foreignKey: "orderId" }, { onDelete: "CASCADE" });
 OrderItem.belongsTo(Order, { foreignKey: "orderId" });
 
 // ? user va comment ulandi
@@ -26,7 +26,7 @@ Comment.belongsTo(User, { foreignKey: "userId" });
 User.hasMany(Product, { foreignKey: "userId" });
 Product.belongsTo(User, { foreignKey: "userId" });
 
-// // ? product va comment ulandi
+// ? product va comment ulandi
 Product.hasMany(Comment, { foreignKey: "productId" });
 Comment.belongsTo(Product, { foreignKey: "productId" });
 
