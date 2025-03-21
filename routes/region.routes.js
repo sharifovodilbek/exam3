@@ -33,7 +33,7 @@ const router = express.Router();
  *       201:
  *         description: Region created successfully
  */
-router.post("/regions",authenticate,authorize(["admin","user","seller"]), async (req, res) => {
+router.post("/regions",/*authenticate,authorize(["admin","user","seller"]),*/ async (req, res) => {
   try {
     const region = await Region.create(req.body);
     res.status(201).json(region);

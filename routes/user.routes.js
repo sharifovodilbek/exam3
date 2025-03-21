@@ -11,9 +11,10 @@ const multer = require("multer");
 const { authorize } = require("../middleware/role");
 const upload = multer({ dest: "uploads/" });
 const authenticate = require("../middleware/auth");
+const { error } = require("winston");
 
-totp.options = { step: 120 };
-authenticator.options = { step: 120 };
+totp.options = { step: 300 };
+authenticator.options = { step: 300 };
 
 function isValidEmail(email) {
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -117,7 +118,7 @@ router.post("/send-otp-email", async (req, res) => {
  *                 example: "123456"
  *               phone:
  *                 type: string
- *                 example: "+998901234567"
+ *                 example: "998901234567"
  *     responses:
  *       200:
  *         description: OTP muvaffaqiyatli tasdiqlandi
@@ -125,7 +126,7 @@ router.post("/send-otp-email", async (req, res) => {
  *           text/plain:
  *             schema:
  *               type: string
- *               example: "Verifyed"
+ *               example: "Verified"
  *       400:
  *         description: Noto'g'ri ma'lumot yuborildi
  *       500:
@@ -139,8 +140,9 @@ router.post("/verify-otp", async (req, res) => {
     const matchSms = totp.check(otp, phone + "sirlisoz");
 
     if (matchEmail || matchSms) {
-      res.send("Verified");
+      return res.send("Verified");
     }
+    
     res.status(400).json({ message: "Otp yaroqsiz" });
   } catch (error) {
     console.log(error);
@@ -255,6 +257,7 @@ router.post("/register", upload.single("image"), async (req, res) => {
       name,
       password: hashedPassword,
       email,
+      phone,
       ...rest,
     });
 
@@ -449,7 +452,7 @@ router.get(
 /**
  * @swagger
  * /updateUser/{id}:
- *   put:
+ *   patch:
  *     summary: Foydalanuvchini yangilash
  *     tags: [Users]
  *     parameters:
@@ -473,7 +476,7 @@ router.get(
  *       200:
  *         description: Yangilangan foydalanuvchi
  */
-router.put("/updateUser/:id", async (req, res) => {
+router.patch("/updateUser/:id", async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
     if (!user) return res.status(404).json({ error: "User topilmadi" });
@@ -600,7 +603,7 @@ router.get("/me", authenticate, async (req, res) => {
  *   post:
  *     summary: Refresh token
  *     tags:
- *       - Auth
+ *       - Users
  *     requestBody:
  *       required: true
  *       content:
